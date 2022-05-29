@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      .gmap_canvas {
+        overflow: hidden;
+        background: none !important;
+        height: 500px;
+        width: 600px;
+      }
+      #mainbody {
+        display: flex;
+        padding: 30px;
+      }
+      #container {
+        box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+        width: 400px;
+        margin-right: 20px;
+        padding: 30px;
+      }
+      #searchbox {
+        display: flex;
+        border: 1px solid red;
+        width: 30%;
+        height: 30px;
+        justify-content: center;
+        margin: auto;
+        padding: 20px;
+        background-color: aqua;
+        margin-bottom: 30px;
+      }
+      #box {
+          display: grid;
+          grid-template-columns: repeat(1,400px);
+          grid-template-rows: repeat(8,100px);
+          gap: 10px;
+          border: 1px solid black;
+          width: 150px;
+          background-color: gray;
+          color: white;
+          margin-left: 20px;
+      }
+      #box>div{
+          border: 1px solid black;
+          width: 150px;
+          
+      }
+    </style>
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="searchbox">
+      <input type="text" placeholder="Enter city" id="city" />
+      <button onclick="getData()">Search</button>
+    </div>
+
+    <div id="mainbody">
+      <div id="container"></div>
+
+      <div class="mapouter">
+        <div class="gmap_canvas">
+          <iframe
+            width="600"
+            height="500"
+            id="gmap_canvas"
+            frameborder="0"
+            scrolling="no"
+            marginheight="0"
+            marginwidth="0"
+          ></iframe>
+        </div>
+      </div>
+
+
+      <div id="box"></div>
+
+
+
+    </div>
+
+
+   
+  </body>
+</html>
+
+<script>
+    var lat1 = 0
+    var log1 = 0
+  const api_key = "fa6471e901f9a51ae040db7d607a351a";
+
+  async function getData() {
+    let submitcity = document.getElementById("city").value;
+
+    let url = `https://api.openweathermap.org/data/2.5/weather?q=${submitcity}&appid=${api_key}`;
+
+    // console.log(url)
+
+    let submitdata = await fetch(url);
+    let objdata = await submitdata.json();
+    console.log(objdata.coord.lon);
+    // console.log(objdata.coord.lat)
+    displayData(objdata);
+
+    let url2 = `https://api.openweathermap.org/data/2.5/onecall?lat=${objdata.coord.lat}&lon=${objdata.coord.lon}&exclude={part}&appid=${api_key}`
+    let submitdata2 = await fetch(url2)
+    let objdata2 = await submitdata2.json()
+    // console.log(objdata2.daily[0].weather[0].description)
+    // console.log(objdata2.daily[0].temp.day)
+    // displayData2(objdata2)
+    console.log(objdata2.daily)
+    displayData2(objdata2.daily)
+
+
+
+  }
+
+  function displayData(data) {
+    document.querySelector("#container").innerHTML = null;
+
+    let h3 = document.createElement("h3");
+    h3.innerText = data.name;
+
+    let p1 = document.createElement("p");
+    p1.innerText = `current Temp: ${data.main.temp}`;
+
+    let p2 = document.createElement("p");
+    p2.innerText = `Temp Max: ${data.main.temp_max}`;
+
+    let p3 = document.createElement("p");
+    p3.innerText = `Temp Min: ${data.main.temp_min}`;
+
+    let p4 = document.createElement("p");
+    p4.innerText = `Wind Speed: ${data.wind.speed}`;
+
+    let p5 = document.createElement("p");
+    p5.innerText = `Humidity: ${data.main.humidity}`;
+
+    let p6 = document.createElement("p");
+    p6.innerText = `Sunrise: ${data.sys.sunrise}`;
+
+    let p7 = document.createElement("p");
+    p7.innerText = `Clouds: ${data.clouds.all}`;
+
+    let p8 = document.createElement("p");
+    p8.innerText = `latitude: ${data.coord.lat}`;
+    lat1 = data.coord.lat
+
+    let p9 = document.createElement("p");
+    p9.innerText = `longitude: ${data.coord.lon}`;
+    log1 = data.coord.lon
+    document
+      .querySelector("#container")
+      .append(h3, p1, p2, p3, p4, p5, p6, p7, p8, p9);
+
+    let iframe = document.querySelector("#gmap_canvas");
+
+    iframe.src = `https://maps.google.com/maps?q=${data.name}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+  console.log(log1,lat1)
+   
+    
+  }
+
+
+  function displayData2(data){
+    document.querySelector("#box").innerHTML=null
+    data.forEach(function(elem){
+     
+
+        var div = document.createElement("div")
+        
+        var p1 = document.createElement("p")
+        p1.innerText = `Weather: ${elem.weather[0].description}`
+
+        var p2 = document.createElement("p")
+        p2.innerText = `Temperature: ${elem.temp.day}`
+        
+
+        div.append(p1,p2)
+          document.querySelector("#box").append(div)
+    })
+  }
+
+</script>
